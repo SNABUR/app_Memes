@@ -23,6 +23,7 @@ const db = new Client({
 db.connect();
 
 
+
 app.post("/create", (req, res) => {
     const { name, ticker, fee, contract, image, creator, creation, supply, webpage, twitter, description, discord, telegram } = req.body;
 
@@ -42,6 +43,8 @@ app.post("/create", (req, res) => {
 });
 
 
+
+
 app.get("/db_memes",(req,res) => {
     const nameFilter = req.query.name || ''; // Obtener el nombre del query parameter 'name'
 
@@ -51,7 +54,7 @@ app.get("/db_memes",(req,res) => {
     
     if (nameFilter !== '') {
         // Si se proporciona un nombre, filtrar por ese nombre y limitar a 3
-        sqlQuery = `SELECT * FROM db_memes WHERE name LIKE ? LIMIT 3`;
+        sqlQuery = `SELECT * FROM db_memes WHERE name LIKE $1 LIMIT 3`;
         // Añadir '%' al inicio y al final del nombre para realizar una búsqueda parcial
         const namePattern = '%' + nameFilter + '%';
         sqlParams = [namePattern];
@@ -70,33 +73,9 @@ app.get("/db_memes",(req,res) => {
     });
 });
 
-
-
-
 //////////// db pools //////////////
 
-app.post("/create",(req,res) => {
-    const token_name = req.body.token_name;
-    const tvl_stk = req.body.tvl_stk;
-    const apy = req.body.apy;
-    const stakers = req.body.stakers;
-    const stk_liq = req.body.stk_liq;
-    const imageUrl = req.body.imageUrl;
-    const multiplier = req.body.multiplier;
-    const token = req.body.token;
-    const stake_contract = req.body.stake_contract;
 
-    db.query('INSERT INTO db_memes(token_name,tvl_stk,apy,stakers,stk_liq,imageUrl,multiplier,token,stake_contract) VALUES(?,?,?,?,?,?,?,?,?)',[token_name,tvl_stk,apy,stakers,stk_liq,imageUrl,multiplier,token,stake_contract],
-    
-(err,result)=>{
-    if(err){
-        console.log(err);
-    }else{
-        res.send("Regitrado con exito");
-    }
-}
-);
-});
 
 
 app.get("/db_pools_memes",(req,res) => {
@@ -135,7 +114,7 @@ const storage = multer.diskStorage({
     fileFilter: function (req, file, cb) {
         // Verificar si el archivo es una imagen
         if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-            return cb(new Error('Solo se permiten archivos de imagen.'));
+            return cb(new Error('Solo se permiten archivos de imagen jpg jpeg png gif.'));
         }
         cb(null, true);
     },
@@ -145,7 +124,7 @@ const storage = multer.diskStorage({
     limits: {
         fileSize: 10 * 1024 * 1024, // Limite de tamaño de archivo: 10MB
     }
-});
+    });
 
 
 app.post("/api/upload",upload. single('image'), async (req, res) => {
