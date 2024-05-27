@@ -23,11 +23,11 @@ const imagekit = new ImageKit({
 });
 
 const db = new Client({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'db_memes',
-    password: '1M3M323_3-152G0553XD##',
-    port: 5432,
+    user: process.env.USER_DB_POSTGRES,
+    host: process.env.HOST_DB_POSTGRES,
+    database: process.env.DATABASE_DB_POSTGRES,
+    password: process.env.PASSWORD_DB_POSTGRES,
+    port: process.env.PORT_DB_POSTGRES,
 });
 
 db.connect();
