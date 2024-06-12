@@ -9,6 +9,8 @@ const path = require('path'); // Importa el módulo 'path'
 const { Client } = require('pg');
 const ImageKit = require("imagekit");
 
+const PINATA_API_KEY = process.env.PINATA_API_KEY;
+const PINATA_SECRET_API_KEY = process.env.PINATA_SECRET_API_KEY;
 
 app.use(cors({
     origin: 'https://goldengcoin.github.io', // Restringe los orígenes permitidos
@@ -57,7 +59,43 @@ app.post("/create", (req, res) => {
     
 });
 
+// json upload comand 
 
+app.post('/create-json', async (req, res) => {
+    try {
+        const jsonData = req.body;
+
+        const pinataUrl = `https://api.pinata.cloud/pinning/pinJSONToIPFS`;
+        const pinataResponse = await axios.post(pinataUrl, jsonData, {
+            headers: {
+                pinata_api_key: PINATA_API_KEY,
+                pinata_secret_api_key: PINATA_SECRET_API_KEY
+            }
+        });
+
+        if (pinataResponse.status === 200) {
+            const ipfsHash = pinataResponse.data.IpfsHash;
+            const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
+
+            res.status(200).json({
+                success: true,
+                ipfsHash: ipfsHash,
+                url: ipfsUrl
+            });
+        } else {
+            res.status(pinataResponse.status).json({
+                success: false,
+                message: pinataResponse.data
+            });
+        }
+    } catch (error) {
+        console.error('Error uploading JSON to Pinata:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
+});
 
 
 app.get("/db_memes",(req,res) => {
