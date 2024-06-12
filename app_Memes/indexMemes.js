@@ -8,6 +8,7 @@ const { processImage } = require('./imageProcessor');
 const path = require('path'); // Importa el módulo 'path'
 const { Client } = require('pg');
 const ImageKit = require("imagekit");
+const axios = require('axios');
 
 const PINATA_API_KEY = process.env.PINATA_API_KEY;
 const PINATA_SECRET_API_KEY = process.env.PINATA_SECRET_API_KEY;
