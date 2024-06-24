@@ -14,7 +14,7 @@ const PINATA_API_KEY = process.env.PINATA_API_KEY;
 const PINATA_SECRET_API_KEY = process.env.PINATA_SECRET_API_KEY;
 
 app.use(cors({
-    origin: 'https://goldengcoin.github.io', // Restringe los orígenes permitidos
+    origin: ['https://goldengcoin.github.io', 'https://jettonfactory.github.io'] // Restringe los orígenes permitidos
 }));
 
 app.use(express.json());
