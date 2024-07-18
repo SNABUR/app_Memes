@@ -9,6 +9,7 @@ const path = require('path'); // Importa el módulo 'path'
 const { Client } = require('pg');
 const ImageKit = require("imagekit");
 const axios = require('axios');
+const { format } = require('date-fns');
 
 const PINATA_API_KEY = process.env.PINATA_API_KEY;
 const PINATA_SECRET_API_KEY = process.env.PINATA_SECRET_API_KEY;
@@ -197,6 +198,30 @@ app.post("/api/upload", upload.single('image'), (req, res) => {
         console.error('Error uploading image:', error);
         res.status(500).json({ error: 'Error uploading image' });
     }
+});
+
+app.post('/create-order', async (req, res) => {
+    const { first_name, last_name, country, city, province, company, address, postal_code, email, wallet_address, item, amount } = req.body;
+    // Calcula la fecha y hora actual
+    const currentDate = new Date();
+    // Genera un OrderCode único basado en la fecha, wallet e item
+    const order_date = format(currentDate, 'yyyyMMdd-HHmmss');
+    const order_code = `${order_date}-${wallet_address}-${item}`;
+
+
+
+    db.query(
+        'INSERT INTO orders (first_name, last_name, country, city, province, company, address, postal_code, email, wallet_address, item, order_date, amount, order_code) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)',
+        [first_name, last_name, country, city, province, company, address, postal_code, email, wallet_address, item, order_date, amount, order_code ],
+        (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json({ error: 'Error al registrar' });
+            } else {
+                res.send("order registered successfully");
+            }
+        }
+    );
 });
 
 // Middleware para manejo de errores global
