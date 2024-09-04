@@ -100,26 +100,27 @@ app.post('/create-json', async (req, res) => {
 });
 
 
-app.get("/db_memes",(req,res) => {
-    const nameFilter = req.query.name || ''; // Obtener el nombre del query parameter 'name'
 
-    // Consulta SQL para obtener los memes filtrados por nombre y limitar los resultados a 3
+app.get("/db_memes", (req, res) => {
+    const searchFilter = req.query.search || ''; // Obtener el valor del query parameter 'search'
+
+    // Consulta SQL para obtener los memes filtrados por nombre o contrato y limitar los resultados
     let sqlQuery = '';
     let sqlParams = [];
     
-    if (nameFilter !== '') {
-        // Si se proporciona un nombre, filtrar por ese nombre y limitar a 3
-        sqlQuery = `SELECT * FROM db_memes WHERE name LIKE $1 LIMIT 3`;
-        // Añadir '%' al inicio y al final del nombre para realizar una búsqueda parcial
-        const namePattern = '%' + nameFilter + '%';
-        sqlParams = [namePattern];
+    if (searchFilter !== '') {
+        // Si se proporciona un filtro, buscar tanto en 'name' como en 'contract'
+        sqlQuery = `SELECT * FROM db_memes WHERE name ILIKE $1 OR contract ILIKE $1 LIMIT 3`;
+        // Añadir '%' al inicio y al final del filtro para realizar una búsqueda parcial
+        const searchPattern = '%' + searchFilter + '%';
+        sqlParams = [searchPattern];
     } else {
-        // Si el nombre está vacío, devolver los primeros 3 memes
+        // Si el filtro está vacío, devolver los primeros 10 memes ordenados por nombre
         sqlQuery = `SELECT * FROM db_memes ORDER BY name ASC LIMIT 10`;
     }
 
-    db.query(sqlQuery, sqlParams, (err,result) => {
-        if(err){
+    db.query(sqlQuery, sqlParams, (err, result) => {
+        if (err) {
             console.log(err);
             res.status(500).json({ error: 'Error fetching memes' });
         } else {
@@ -127,6 +128,32 @@ app.get("/db_memes",(req,res) => {
         }
     });
 });
+
+
+app.get("/meme_by_contract", (req, res) => {
+    const { contract, network } = req.query; // Obtener los valores de los query parameters 'contract' y 'network'
+
+    // Verificar que ambos parámetros estén presentes
+    if (!contract || !network) {
+        return res.status(400).json({ error: 'Contract and network parameters are required' });
+    }
+
+    // Consulta SQL para obtener el meme único basado en 'contract' y 'network'
+    const sqlQuery = `SELECT * FROM db_memes WHERE contract = $1 AND network = $2 LIMIT 1`;
+    const sqlParams = [contract, network];
+
+    db.query(sqlQuery, sqlParams, (err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ error: 'Error fetching meme' });
+        } else if (result.rows.length === 0) {
+            res.status(404).json({ error: 'Meme not found' });
+        } else {
+            res.send(result.rows[0]); // Devolver el ítem único encontrado
+        }
+    });
+});
+
 
 //////////// db pools //////////////
 
