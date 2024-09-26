@@ -49,7 +49,7 @@ app.post("/create", (req, res) => {
     const uniqueId = contract + "_" + Date.now(); 
 
     db.query(
-        'INSERT INTO db_memes(id, name, ticker, fee, contract, image, creator, creation, supply, webpage, twitter, description, discord, twitch, network) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)',
+        'INSERT INTO db_memes(id, name, ticker, fee, contract, image, creator, creation, supply, webpage, twitter, description, discord, twitch, network) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
         [uniqueId, name, ticker, fee, contract, image, creator, creation, supply, webpage, twitter, description, discord, twitch, network],
         (err, result) => {
             if (err) {
