@@ -45,10 +45,12 @@ const generateUniqueFilename = (originalName) => {
 
 app.post("/create", (req, res) => {
     const { name, ticker, fee, contract, image, creator, creation, supply, webpage, twitter, description, discord, twitch, network } = req.body;
+    
+    const uniqueId = contract + "_" + Date.now(); 
 
     db.query(
-        'INSERT INTO db_memes(name, ticker, fee, contract, image, creator, creation, supply, webpage, twitter, description, discord, twitch, network) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)',
-        [name, ticker, fee, contract, image, creator, creation, supply, webpage, twitter, description, discord, twitch, network],
+        'INSERT INTO db_memes(id, name, ticker, fee, contract, image, creator, creation, supply, webpage, twitter, description, discord, twitch, network) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)',
+        [uniqueId, name, ticker, fee, contract, image, creator, creation, supply, webpage, twitter, description, discord, twitch, network],
         (err, result) => {
             if (err) {
                 console.log(err);
