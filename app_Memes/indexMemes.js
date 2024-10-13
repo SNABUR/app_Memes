@@ -10,6 +10,8 @@ const { Client } = require('pg');
 const ImageKit = require("imagekit");
 const axios = require('axios');
 const { format } = require('date-fns');
+const ethers = require("ethers");
+const { contractABI_UNISWAP_FACTORY_V2 } = require('./abis/Constants.js');
 
 const PINATA_API_KEY = process.env.PINATA_API_KEY;
 const PINATA_SECRET_API_KEY = process.env.PINATA_SECRET_API_KEY;
@@ -156,6 +158,49 @@ app.get("/meme_by_contract", (req, res) => {
     });
 });
 
+app.get("/meme_pool", async (req, res) => {
+    const { contract, network, AMM } = req.query; // Obtener los valores de los query parameters 'contract', 'network' y 'AMM'
+    //console.log(contract, network, AMM )
+    // Verificar que los parámetros necesarios estén presentes
+    if (!contract || !network || !AMM) {
+        return res.status(400).json({ error: 'Contract, network, and AMM parameters are required' });
+    }
+
+    try {
+        // Consultar la base de datos para obtener el router del AMM específico
+        const routerQuery = `SELECT factory, weth FROM db_lp WHERE network = $1 AND AMM = $2 LIMIT 1`;
+        const poolFactory = await db.query(routerQuery, [network, AMM]);
+        if (poolFactory.rows.length === 0) {
+            return res.status(404).json({ error: 'Factory and WETH not found for the specified network and AMM' });
+        }
+        const FactoryAddress = poolFactory.rows[0].factory;
+        const wethAddress = poolFactory.rows[0].weth;
+
+        // Consultar la base de datos para obtener el RPC del network específico
+        const rpcQuery = `SELECT * FROM db_rpcs WHERE network = $1 LIMIT 1`;
+        const rpcResult = await db.query(rpcQuery, [network]);
+
+        const rpcUrl = rpcResult.rows[0].url;
+
+        // Conectar al proveedor usando el RPC URL
+        const provider = new ethers.JsonRpcProvider(rpcUrl);
+
+        const FactoryContract = new ethers.Contract(FactoryAddress, contractABI_UNISWAP_FACTORY_V2, provider);
+
+        // Lógica para obtener el par de liquidez correspondiente al contrato del token
+        // Por ejemplo, puedes usar el contrato de pares para encontrar los tokens en el par
+        const pairAddress = await FactoryContract.getPair(contract, wethAddress); // Modifica esto según el AMM específico
+
+
+        // Devolver la información del pool
+        res.json({
+            pairAddress,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error fetching liquidity pool information' });
+    }
+});
 
 //////////// db pools //////////////
 
