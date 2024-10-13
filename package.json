@@ -4,7 +4,7 @@
   "description": "Server to manejar la carga de imágenes y operaciones con bases de datos",
   "main": "index.js",
   "scripts": {
-    "start": "node indexmemes.js",
+    "start": "node app_memes/indexmemes.js",
     "dev": "nodemon indexmemes.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
