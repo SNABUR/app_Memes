@@ -6,7 +6,7 @@ const cors = require("cors");
 const { v4: uuidv4 } = require('uuid');
 const { processImage } = require('./imageProcessor');
 const path = require('path'); // Importa el módulo 'path'
-const { Client } = require('pg');
+const { Pool } = require('pg');
 const ImageKit = require("imagekit");
 const axios = require('axios');
 const { format } = require('date-fns');
@@ -28,7 +28,7 @@ const imagekit = new ImageKit({
     urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
 });
 
-const db = new Client({
+const db = new Pool({
     user: process.env.USER_DB_POSTGRES,
     host: process.env.HOST_DB_POSTGRES,
     database: process.env.DATABASE_DB_POSTGRES,
@@ -36,8 +36,16 @@ const db = new Client({
     port: process.env.PORT_DB_POSTGRES,
 });
 
-db.connect();
-
+const connectWithRetry = () => {
+    db.connect(err => {
+        if (err) {
+            console.error('Failed to connect to the database. Retrying in 5 seconds...', err);
+            setTimeout(connectWithRetry, 5000);
+        } else {
+            console.log('Connected to the database');
+        }
+    });
+};
 const generateUniqueFilename = (originalName) => {
     const timestamp = new Date().getTime();
     const ext = path.extname(originalName); // Obtiene la extensión del archivo
