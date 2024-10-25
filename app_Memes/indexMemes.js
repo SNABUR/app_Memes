@@ -17,7 +17,7 @@ const PINATA_API_KEY = process.env.PINATA_API_KEY;
 const PINATA_SECRET_API_KEY = process.env.PINATA_SECRET_API_KEY;
 
 app.use(cors({
-    origin: ['https://ggeese.github.io', 'https://jettonfactory.github.io', 'https://ggeese.github.io'] // Restringe los orígenes permitidos
+    origin: ['https://ggeese.github.io', 'https://jettonfactory.github.io', 'https://ggeese.fun'] // Restringe los orígenes permitidos
 }));
 
 app.use(express.json());
